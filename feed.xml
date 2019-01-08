@@ -1,0 +1,790 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.4">Jekyll</generator><link href="https://diamantidis.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://diamantidis.github.io/" rel="alternate" type="text/html" /><updated>2019-01-08T21:21:55+00:00</updated><id>https://diamantidis.github.io/</id><title type="html">Ioannis Diamantidis</title><subtitle>A blog to publish my ideas and thoughts about software developer</subtitle><author><name>Ioannis Diamantidis</name><email>diamantidis@outlook.com</email></author><entry><title type="html">Useful Curl features</title><link href="https://diamantidis.github.io/2019/01/06/curl-options" rel="alternate" type="text/html" title="Useful Curl features" /><published>2019-01-06T06:00:00+00:00</published><updated>2019-01-06T06:00:00+00:00</updated><id>https://diamantidis.github.io/2019/01/06/curl-options</id><content type="html" xml:base="https://diamantidis.github.io/2019/01/06/curl-options">&lt;p&gt;Happy New Year everyone!! This is my first post of the year!!&lt;br /&gt;
+Today’s topic is a guide about some of the features of &lt;a href=&quot;https://github.com/curl/curl&quot;&gt;curl&lt;/a&gt;. Curl is a command line tool that can be used to make API requests and generally to transfer data to a URL from the Terminal.&lt;/p&gt;
+
+&lt;p&gt;As a developer you will often encounter situations where you will have to communicate with an API to fetch information or do some kind of transaction (create, update, delete, file upload). And curl is a tool to help on these situations. To install curl on a Mac, given that Homebrew is already installed, you just have to run &lt;code class=&quot;highlighter-rouge&quot;&gt;brew install curl&lt;/code&gt; and then you will be able to run the &lt;code class=&quot;highlighter-rouge&quot;&gt;curl&lt;/code&gt; command. To get more information about curl, you can refer to curl’s man page by typing &lt;code class=&quot;highlighter-rouge&quot;&gt;man curl&lt;/code&gt; on your terminal.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;To search for options when using the man command, type &lt;code class=&quot;highlighter-rouge&quot;&gt;/&lt;/code&gt; followed by the term that you are looking for. For example, to find the occurrences of the word &lt;code class=&quot;highlighter-rouge&quot;&gt;file&lt;/code&gt;, just type &lt;code class=&quot;highlighter-rouge&quot;&gt;/file&lt;/code&gt; and then use &lt;code class=&quot;highlighter-rouge&quot;&gt;n&lt;/code&gt; and &lt;code class=&quot;highlighter-rouge&quot;&gt;Shift&lt;/code&gt; + &lt;code class=&quot;highlighter-rouge&quot;&gt;n&lt;/code&gt;, to navigate forth and back respectively.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;If you are using Alamofire to handle the requests, then you can print the curl command of any of them, by just using &lt;code class=&quot;highlighter-rouge&quot;&gt;debugPrint(request)&lt;/code&gt;, where request is the &lt;code class=&quot;highlighter-rouge&quot;&gt;Alamofire.request&lt;/code&gt;. More info can be found on &lt;a href=&quot;https://github.com/Alamofire/Alamofire/blob/master/Documentation/Usage.md#customdebugstringconvertible&quot;&gt;Alamofire’s documentation&lt;/a&gt;.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;For all the example mentioned in this post, I am using a local Vapor project, with the initial &lt;code class=&quot;highlighter-rouge&quot;&gt;Todo&lt;/code&gt; endpoints plus some others that I added to present some of the options. I will come back with more about Vapor on a future post. :wink:&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;So let’s start!!!&lt;/p&gt;
+
+&lt;h1 id=&quot;verbose-mode&quot;&gt;Verbose mode&lt;/h1&gt;
+
+&lt;p&gt;When making a request, sometimes you are not only interested about the content of the response, but maybe also for some other information like the response status or the headers. To get this kind of information, along with a more detailed representation of both the request and the response, you can append your command with the option &lt;code class=&quot;highlighter-rouge&quot;&gt;-v&lt;/code&gt; or &lt;code class=&quot;highlighter-rouge&quot;&gt;--verbose&lt;/code&gt;. For example, you can write a command like this,&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;curl 'http://localhost:8080/todos' -v
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h1 id=&quot;timing-breakdown&quot;&gt;Timing breakdown&lt;/h1&gt;
+
+&lt;p&gt;To get more information on the exact duration that each step of the request takes, like how long it takes until the name resolving is completed, or how long it takes to connect with the server or how long it takes to transfer the information, you can use the option &lt;code class=&quot;highlighter-rouge&quot;&gt;--write-out&lt;/code&gt; together with the options available like &lt;code class=&quot;highlighter-rouge&quot;&gt;time_namelookup&lt;/code&gt;, &lt;code class=&quot;highlighter-rouge&quot;&gt;time_connect&lt;/code&gt;, &lt;code class=&quot;highlighter-rouge&quot;&gt;time_starttransfer&lt;/code&gt; etc..&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://diamantidis.github.io/assets/curl/write_out_option.png&quot; alt=&quot;Write-out option from man page screenshot&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;As an example you can use this command&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;curl \
+--output /dev/null \
+--silent \
+--write-out 'namelookup:    %{time_namelookup}\nconnect:       %{time_connect}\npretransfer:   %{time_pretransfer}\nstarttransfer: %{time_starttransfer}\ntotal:         %{time_total}\n' \
+http://localhost:8080/todos 
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;and the result will be a response like this:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://diamantidis.github.io/assets/curl/write_out_output.png&quot; alt=&quot;Write-out output screenshot&quot; /&gt;&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;The options &lt;code class=&quot;highlighter-rouge&quot;&gt;--output /dev/null&lt;/code&gt; and &lt;code class=&quot;highlighter-rouge&quot;&gt;--silent&lt;/code&gt; are used to not show the response of the request and to not show the progress of the request respectively, thus getting a better-looking overview of the information.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;An alternative to using this lengthy command line is to use a file instead. You can create a file with the content of the &lt;code class=&quot;highlighter-rouge&quot;&gt;--write-out&lt;/code&gt; option and then use this file.&lt;/p&gt;
+
+&lt;p&gt;For example, you can create a file, with the name &lt;code class=&quot;highlighter-rouge&quot;&gt;curl_format.txt&lt;/code&gt; and the following content:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;    namelookup:  %{time_namelookup}\n
+       connect:  %{time_connect}\n
+   pretransfer:  %{time_pretransfer}\n
+ starttransfer:  %{time_starttransfer}\n
+                    ----------\n
+         total:  %{time_total}\n
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;And then run the command:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;curl \
+-o /dev/null \
+-s \
+-w '@curl_format.txt' \
+http://localhost:8080/todos 
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;and you will get a familiar response as before.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;-o&lt;/code&gt;, &lt;code class=&quot;highlighter-rouge&quot;&gt;-s&lt;/code&gt; and &lt;code class=&quot;highlighter-rouge&quot;&gt;-m&lt;/code&gt; are the single character alternative to &lt;code class=&quot;highlighter-rouge&quot;&gt;--output&lt;/code&gt;, &lt;code class=&quot;highlighter-rouge&quot;&gt;--silent&lt;/code&gt; and &lt;code class=&quot;highlighter-rouge&quot;&gt;--write-out&lt;/code&gt; options&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h1 id=&quot;proxy&quot;&gt;Proxy&lt;/h1&gt;
+
+&lt;p&gt;If you want to pass the request through a proxy, like &lt;a href=&quot;https://www.charlesproxy.com/&quot;&gt;Charles&lt;/a&gt; you can use the option &lt;code class=&quot;highlighter-rouge&quot;&gt;-x&lt;/code&gt; or &lt;code class=&quot;highlighter-rouge&quot;&gt;--proxy&lt;/code&gt;, for example&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;curl -x http://localhost:8888 http://localhost:8080/todos
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://diamantidis.github.io/assets/curl/curl_man_proxy_option.png&quot; alt=&quot;man page proxy option screenshot&quot; /&gt;&lt;/p&gt;
+
+&lt;h1 id=&quot;url-options&quot;&gt;URL options&lt;/h1&gt;
+
+&lt;p&gt;One of the first topics that the &lt;code class=&quot;highlighter-rouge&quot;&gt;man curl&lt;/code&gt; command covers is the URL and how this can be formatted.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://diamantidis.github.io/assets/curl/curl_man_url_options.png&quot; alt=&quot;man page url options screenshot&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;With a smart use of this formatting template, you can have a series of numbers as a url param and in this way making the same request multiple times, like in the following example.
+Running &lt;code class=&quot;highlighter-rouge&quot;&gt;curl 'http://localhost:8080/todos?[1-5]'&lt;/code&gt; will result in making 5 requests&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://diamantidis.github.io/assets/curl/curl_multiple_requests.png&quot; alt=&quot;curl multiple requests screenshot&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;You can also use these options to make requests to fetch the corresponding information for a list of items, like &lt;code class=&quot;highlighter-rouge&quot;&gt;curl 'http://localhost:8080/todos/[1-5]'&lt;/code&gt; which will result in 5 requests, one for each id.
+It also supports a stepper to the range, like &lt;code class=&quot;highlighter-rouge&quot;&gt;curl 'http://localhost:8080/todos/[1-5:2]'&lt;/code&gt; to make a request only for the odd numbers.&lt;/p&gt;
+
+&lt;p&gt;The results will be:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://diamantidis.github.io/assets/curl/curl_multiple_requests_stepper.png&quot; alt=&quot;curl multiple requests stepper screenshot&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Lastly, you can provide a set of options inside curly brackets, like in the following command&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;curl 'http://localhost:8080/todos/{1,2,4}'
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;which will result in three request for these ids. The values can be alphanumeric, so this can be used with letters or words too, like for example&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;curl 'http://localhost:8080/todos/{a,b,c}'
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;And also they can be used simultaneously when constructing a url like, &lt;code class=&quot;highlighter-rouge&quot;&gt;curl 'http://localhost:8080/v[1-2]/todos/{a,b,c}'&lt;/code&gt;, which will result in 6 requests, three for v1 and three for v2.&lt;/p&gt;
+
+&lt;h1 id=&quot;file-upload&quot;&gt;File upload&lt;/h1&gt;
+
+&lt;p&gt;When you want to upload a file you can use the following curl command:&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;curl -X POST \
+'http://localhost:8080/upload' \
+-H 'Content-Type: multipart/form-data;' \
+-F 'image=@image.png;type=image/png;'
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;The &lt;code class=&quot;highlighter-rouge&quot;&gt;-F&lt;/code&gt; option is used to specify the HTTP multipart POST data and &lt;code class=&quot;highlighter-rouge&quot;&gt;image&lt;/code&gt; is the name of the field.
+Again, a more detailed description about this option can be found on the man page.
+&lt;img src=&quot;https://diamantidis.github.io/assets/curl/curl_man_form_option.png&quot; alt=&quot;man page form option screenshot&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+
+&lt;p&gt;These are a few examples of curl usage that I found useful for me and I want to share as it could come handy for others too. Obviously, there are a lot more options and the way to find them is by searching the man page. 
+Hope that you find it useful too, and if want to mention some other options that I haven’t mentioned, feel free to write a comment!!!&lt;/p&gt;</content><author><name>Ioannis Diamantidis</name><email>diamantidis@outlook.com</email></author><category term="Curl" /><category term="API" /><category term="Terminal" /><category term="File Upload" /><summary type="html">Happy New Year everyone!! This is my first post of the year!! Today’s topic is a guide about some of the features of curl. Curl is a command line tool that can be used to make API requests and generally to transfer data to a URL from the Terminal.</summary></entry><entry><title type="html">A guide to SwiftLint</title><link href="https://diamantidis.github.io/2018/12/23/a-guide-to-swiftlint" rel="alternate" type="text/html" title="A guide to SwiftLint" /><published>2018-12-23T08:30:00+00:00</published><updated>2018-12-23T08:30:00+00:00</updated><id>https://diamantidis.github.io/2018/12/23/a-guide-to-swiftlint</id><content type="html" xml:base="https://diamantidis.github.io/2018/12/23/a-guide-to-swiftlint">&lt;p&gt;&lt;a href=&quot;https://github.com/realm/SwiftLint&quot;&gt;SwiftLint&lt;/a&gt; is a great tool to enforce Swift style and conventions.
+When working with different developers with different levels of experience and different preferences it is hard to keep a consistency in the way the code is written. 
+Furthermore, as a developer, we are quite lazy to check for linting issues every time we commit, so better let a tool and CI do the job for us.
+Long story short, SwiftLint is a tool to help a team configure some styling rules based on its needs and preferences, and later on, using CI, enforce these rules to the whole development team.&lt;/p&gt;
+
+&lt;h2 id=&quot;how-to-install&quot;&gt;How to install&lt;/h2&gt;
+
+&lt;p&gt;SwiftLint can be installed using various ways. The easiest way is to install the pre-built package, by downloading the .pkg file from the &lt;a href=&quot;https://github.com/realm/SwiftLint/releases&quot;&gt;latest GitHub release&lt;/a&gt;.
+Another easy way is by using Homebrew and running &lt;code class=&quot;highlighter-rouge&quot;&gt;brew install swiftlint&lt;/code&gt;. SwiftLint can also be installed using CocoaPods, by adding &lt;code class=&quot;highlighter-rouge&quot;&gt;pod 'SwiftLint'&lt;/code&gt; to the Podfile and running &lt;code class=&quot;highlighter-rouge&quot;&gt;pod install&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;More instructions and details can be found on the project’s &lt;a href=&quot;https://github.com/realm/SwiftLint#installation&quot;&gt;GitHub Page&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2 id=&quot;integrate-with-xcode&quot;&gt;Integrate with Xcode&lt;/h2&gt;
+
+&lt;p&gt;After installing, SwiftLint can be integrated into Xcode (or other editors like AppCode) so that you can get the warnings and errors when building the project and have them displayed in the IDE.&lt;/p&gt;
+
+&lt;p&gt;To do so, for Xcode, add a new “Run Script Phase” in the “Build Phases” section. This script should be like the following snippet if the installation is done using CocoaPods&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;if which &quot;${PODS_ROOT}/SwiftLint/swiftlint&quot; &amp;gt;/dev/null; then
+    ${PODS_ROOT}/SwiftLint/swiftlint
+else
+    echo &quot;warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint&quot;
+fi
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://diamantidis.github.io/assets/swiftlint/swiftlint_run_script_phase.png&quot; alt=&quot;SwiftLint Run Script Phase screenshot&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;integrate-with-fastlane&quot;&gt;Integrate with fastlane&lt;/h2&gt;
+
+&lt;p&gt;You can also integrate SwiftLint with fastlane by adding another lane in the &lt;code class=&quot;highlighter-rouge&quot;&gt;Fastfile&lt;/code&gt;, like:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;desc &quot;Run linting&quot;
+lane :lint do
+swiftlint(
+  executable: './Pods/SwiftLint/swiftlint', 
+  mode: :lint,
+  strict: true,
+  config_file: '.swiftlint.yml',
+)
+end
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Now, you can run &lt;code class=&quot;highlighter-rouge&quot;&gt;fastlane lint&lt;/code&gt; and you will get the list of issues.&lt;/p&gt;
+
+&lt;p&gt;For more options, you can refer to the &lt;a href=&quot;https://docs.fastlane.tools/actions/swiftlint/&quot;&gt;documentation&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2 id=&quot;swiftlint-rules&quot;&gt;SwiftLint rules.&lt;/h2&gt;
+
+&lt;p&gt;After having everything set up, it’s time to configure the rules. 
+SwiftLint offers a plethora of rules and you can use the &lt;code class=&quot;highlighter-rouge&quot;&gt;.swiftlint.yml&lt;/code&gt; file to configure them.&lt;/p&gt;
+
+&lt;p&gt;Enforcing the length of a line, a file or the body of a function and display some warning when using force casting and force try are some of the simplest but really useful rules, that you can start with. 
+Other rules can be enforcing private IBActions and IBOutlets or throwing an error when using a legacy constructors. 
+To check the full list of the rules that comes with SwiftLint, you can run the command &lt;code class=&quot;highlighter-rouge&quot;&gt;swiftlint rules&lt;/code&gt; and choose the rules you want to have in your project.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://diamantidis.github.io/assets/swiftlint/swiftlint_rules.png&quot; alt=&quot;SwiftLint Rules screenshot&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;To get more details about each rule, you can run the &lt;code class=&quot;highlighter-rouge&quot;&gt;swiftlint rules&lt;/code&gt; command appended with the identifier of the rule, like &lt;code class=&quot;highlighter-rouge&quot;&gt;swiftlint rules todo&lt;/code&gt;.
+To add a rule to your &lt;code class=&quot;highlighter-rouge&quot;&gt;.swiftlint.yml&lt;/code&gt;, all you have to do is to enable it in the &lt;code class=&quot;highlighter-rouge&quot;&gt;opt_in_rules&lt;/code&gt; section.&lt;/p&gt;
+
+&lt;p&gt;An example of a &lt;code class=&quot;highlighter-rouge&quot;&gt;swiftlint.yml&lt;/code&gt; file is the following:&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;force_cast: warning
+force_try: warning
+
+line_length:
+  warning: 120
+  error: 500
+
+file_length:
+  warning: 600
+  error: 1000
+
+function_body_length:
+  warning: 40
+  error: 120
+
+opt_in_rules:
+  - empty_count
+  - force_unwrapping
+  - legacy_constant
+  - legacy_constructor
+  - private_action
+  - private_outlet
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Apart from these rules, there is the option to add some customs rules by using some regex expression. This can be done by appending the &lt;code class=&quot;highlighter-rouge&quot;&gt;swiftlint.yml&lt;/code&gt; file with a &lt;code class=&quot;highlighter-rouge&quot;&gt;custom_rules&lt;/code&gt; section containing the rule.&lt;/p&gt;
+
+&lt;p&gt;For example, to add a rule to enforce an empty space after a guard statement add the following snippet to your &lt;code class=&quot;highlighter-rouge&quot;&gt;swiftlint.yml&lt;/code&gt; file:&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;custom_rules:
+  empty_line_after_guard:
+    name: &quot;Empty Line After Guard&quot;
+    regex: '(^ *guard[ a-zA-Z0-9=?.\(\),&amp;gt;&amp;lt;!]*\{[ a-zA-Z0-9=?.\(\),&amp;gt;&amp;lt;!]*\}\n *(?!(?:return|guard))\S+)'
+    message: &quot;There should be an empty line after a guard&quot;
+    severity: warning
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Despite the fact that SwiftLine offers so many rules and such flexibility for customizations, sometimes you may not able to comply to a rule. SwiftLint has got you covered for this scenario too.&lt;/p&gt;
+
+&lt;p&gt;You can use a comment in the code file to disable the check for a specific rule to a specific line. To do so, just add a comment as in the following snippet.&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;// swiftlint:disable:next force_cast
+let noWarning = NSNumber() as! Int
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;To run the command against a single file, you can use the option &lt;code class=&quot;highlighter-rouge&quot;&gt;--path&lt;/code&gt; when running the &lt;code class=&quot;highlighter-rouge&quot;&gt;swiftlint lint&lt;/code&gt; command like &lt;code class=&quot;highlighter-rouge&quot;&gt;swiftlint lint --path Project/AppDelegate.swift&lt;/code&gt;. Alternatively, you can use the following command if you want to run against two or more files,&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;SCRIPT_INPUT_FILE_COUNT=2 SCRIPT_INPUT_FILE_0=&quot;Project/AppDelegate.swift&quot; SCRIPT_INPUT_FILE_1=&quot;Project/ViewController.swift&quot; swiftlint lint --use-script-input-files
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Last but not least is the process of fixing the linting issues. For some rules this has to be done manually but for some others it can be done automatically.
+If you notice, when running the &lt;code class=&quot;highlighter-rouge&quot;&gt;swiftlint rules&lt;/code&gt; command, each rule has a column named &lt;code class=&quot;highlighter-rouge&quot;&gt;correctable&lt;/code&gt;. This means that those rules can be automatically fixed by simply running the &lt;code class=&quot;highlighter-rouge&quot;&gt;swiftlint autocorrect&lt;/code&gt; command. And of course, the above-mentioned ways of running against one or more files can be applied for the autocorrect command too. Also, a different lane can be added to the Fastfile to cater for the autocorrect using the &lt;code class=&quot;highlighter-rouge&quot;&gt;autocorrect&lt;/code&gt; mode.&lt;/p&gt;
+
+&lt;p&gt;For example,&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;  desc &quot;Run lint autocorrect&quot;
+  lane :lint_autocorrect do
+    swiftlint(
+      mode: :autocorrect,
+      executable: './Pods/SwiftLint/swiftlint',
+      config_file: '.swiftlint.yml',
+    )
+  end
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+
+&lt;p&gt;This is just an introduction to the full list of options that SwiftLint provides. Despite the fact that only a handful of options are mentioned, it is clear that SwiftLint is a great tool to use and can help to provide consistency in the codebase and reduce the code smells.&lt;/p&gt;
+
+&lt;p&gt;This is my last blog post for 2018, so … &lt;br /&gt;
+Merry Christmas and a Happy New Year!! :santa::christmas_tree:&lt;/p&gt;</content><author><name>Ioannis Diamantidis</name><email>diamantidis@outlook.com</email></author><category term="SwiftLint" /><category term="Xcode" /><category term="Fastlane" /><category term="CI" /><summary type="html">SwiftLint is a great tool to enforce Swift style and conventions. When working with different developers with different levels of experience and different preferences it is hard to keep a consistency in the way the code is written. Furthermore, as a developer, we are quite lazy to check for linting issues every time we commit, so better let a tool and CI do the job for us. Long story short, SwiftLint is a tool to help a team configure some styling rules based on its needs and preferences, and later on, using CI, enforce these rules to the whole development team.</summary></entry><entry><title type="html">Xcode shortcuts and custom key bindings</title><link href="https://diamantidis.github.io/2018/12/07/xcode-shortcuts-and-custom-key-bindings" rel="alternate" type="text/html" title="Xcode shortcuts and custom key bindings" /><published>2018-12-07T22:00:00+00:00</published><updated>2018-12-07T22:00:00+00:00</updated><id>https://diamantidis.github.io/2018/12/07/xcode-shortcuts-and-custom-key-bindings</id><content type="html" xml:base="https://diamantidis.github.io/2018/12/07/xcode-shortcuts-and-custom-key-bindings">&lt;p&gt;A recent discussion with a colleague about the use of the Xcode shortcuts is the reason behind this blog post.&lt;/p&gt;
+
+&lt;p&gt;The use of keyboard shortcuts can result in greater productivity because it enables a developer to navigate, perform actions and edit code more efficiently compared to using the mouse and the navigation menu.&lt;/p&gt;
+
+&lt;p&gt;Apart from this, writing this blog post is also a great opportunity for me to learn more about Xcode shortcuts.&lt;/p&gt;
+
+&lt;p&gt;A list of the “default” Xcode shortucts, as listed by Apple, can be found &lt;a href=&quot;https://developer.apple.com/library/archive/documentation/IDEs/Conceptual/xcode_help-command_shortcuts/Introduction/Introduction.html#//apple_ref/doc/uid/TP40010560-CH1-SW1&quot;&gt;here&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Also this list can be found in Xcode by following Xcode &amp;gt; Preferences (or better &lt;code class=&quot;highlighter-rouge&quot;&gt;⌘&lt;/code&gt; + &lt;code class=&quot;highlighter-rouge&quot;&gt;,&lt;/code&gt;) &amp;gt; Key bindings, where you can also edit or add new shortcuts to the commands not yet set.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://diamantidis.github.io/assets/shortcuts/key_bindings_menu.png&quot; alt=&quot;key bindings menu in xcode screenshot&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;key-mapping&quot;&gt;Key mapping&lt;/h2&gt;
+&lt;p&gt;As some may be unaware and since more often than not Apple’s keyboards don’t use the symbols, the mapping of the keys to the symbols is the following:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;⌃&lt;/code&gt; (Control)&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;⌥&lt;/code&gt; (Option)&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;⇧&lt;/code&gt; (Shift)&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;⌘&lt;/code&gt; (Command)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Those symbols will be later used in conjunction with a primary key to form the shortcuts.&lt;/p&gt;
+
+&lt;h2 id=&quot;some-examples-of-useful-shortcuts&quot;&gt;Some examples of useful shortcuts&lt;/h2&gt;
+&lt;p&gt;A list of commands that I primarily use are listed below:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;Go to line (&lt;code class=&quot;highlighter-rouge&quot;&gt;⌘&lt;/code&gt; + &lt;code class=&quot;highlighter-rouge&quot;&gt;L&lt;/code&gt;) &lt;br /&gt;&lt;span class=&quot;list_item_description&quot;&gt;As a result, an input text will pop up, and there you can add the number of the line you want to move to.
+&lt;img src=&quot;https://diamantidis.github.io/assets/shortcuts/line_number.png&quot; alt=&quot;go to line screenshot&quot; /&gt;
+&lt;/span&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Add breakpoint ( &lt;code class=&quot;highlighter-rouge&quot;&gt;⌘&lt;/code&gt;+ &lt;code class=&quot;highlighter-rouge&quot;&gt;\&lt;/code&gt;) &lt;br /&gt;&lt;span class=&quot;list_item_description&quot;&gt;A breakpoint will be added to the line.  To activate/deactivate the debugger use &lt;code class=&quot;highlighter-rouge&quot;&gt;⌘&lt;/code&gt; + &lt;code class=&quot;highlighter-rouge&quot;&gt;Y&lt;/code&gt;.
+&lt;/span&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Fold method (&lt;code class=&quot;highlighter-rouge&quot;&gt;⇧&lt;/code&gt; + &lt;code class=&quot;highlighter-rouge&quot;&gt;⌥&lt;/code&gt; + &lt;code class=&quot;highlighter-rouge&quot;&gt;⌘&lt;/code&gt; + &lt;code class=&quot;highlighter-rouge&quot;&gt;←&lt;/code&gt;) &lt;br /&gt;&lt;span class=&quot;list_item_description&quot;&gt;To unfold method (&lt;code class=&quot;highlighter-rouge&quot;&gt;⇧&lt;/code&gt; + &lt;code class=&quot;highlighter-rouge&quot;&gt;⌥&lt;/code&gt; + &lt;code class=&quot;highlighter-rouge&quot;&gt;⌘&lt;/code&gt; + &lt;code class=&quot;highlighter-rouge&quot;&gt;→&lt;/code&gt;)&lt;/span&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Build ( &lt;code class=&quot;highlighter-rouge&quot;&gt;⌘&lt;/code&gt; + &lt;code class=&quot;highlighter-rouge&quot;&gt;B&lt;/code&gt; ) &lt;br /&gt;&lt;span class=&quot;list_item_description&quot;&gt;Also, to clean (&lt;code class=&quot;highlighter-rouge&quot;&gt;⇧&lt;/code&gt; + &lt;code class=&quot;highlighter-rouge&quot;&gt;⌘&lt;/code&gt; + &lt;code class=&quot;highlighter-rouge&quot;&gt;K&lt;/code&gt;)&lt;/span&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Find call hierarchy (&lt;code class=&quot;highlighter-rouge&quot;&gt;⌃&lt;/code&gt; + &lt;code class=&quot;highlighter-rouge&quot;&gt;⇧&lt;/code&gt; + &lt;code class=&quot;highlighter-rouge&quot;&gt;⌘&lt;/code&gt; + &lt;code class=&quot;highlighter-rouge&quot;&gt;H&lt;/code&gt;) &lt;br /&gt;&lt;span class=&quot;list_item_description&quot;&gt;When on a function name, you can press the above-mentioned key combination to find the callers of the function.&lt;/span&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Edit all in scope ( &lt;code class=&quot;highlighter-rouge&quot;&gt;⌃&lt;/code&gt; + &lt;code class=&quot;highlighter-rouge&quot;&gt;⌘&lt;/code&gt; + &lt;code class=&quot;highlighter-rouge&quot;&gt;E&lt;/code&gt;) &lt;br /&gt;&lt;span class=&quot;list_item_description&quot;&gt;It can be useful in case of renaming a variable or function.&lt;/span&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Jump to Definition (&lt;code class=&quot;highlighter-rouge&quot;&gt;⌃&lt;/code&gt; + &lt;code class=&quot;highlighter-rouge&quot;&gt;⌘&lt;/code&gt; + &lt;code class=&quot;highlighter-rouge&quot;&gt;J&lt;/code&gt;) &lt;br /&gt;&lt;span class=&quot;list_item_description&quot;&gt;This can be used if you want to jump to the definition of the method. Also, use  &lt;code class=&quot;highlighter-rouge&quot;&gt;⌃&lt;/code&gt; + &lt;code class=&quot;highlighter-rouge&quot;&gt;⌘&lt;/code&gt; + &lt;code class=&quot;highlighter-rouge&quot;&gt;←&lt;/code&gt; to go back to the invoker again if it’s in a different file.&lt;/span&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Move focus to editor (&lt;code class=&quot;highlighter-rouge&quot;&gt;⌘&lt;/code&gt; + &lt;code class=&quot;highlighter-rouge&quot;&gt;J&lt;/code&gt;) &lt;br /&gt;&lt;span class=&quot;list_item_description&quot;&gt;To move the focus/cursor to the editor area. A new window will open and you can select if you want to move to the editor, to add to a new assistant editor or to move to an existing one.
+&lt;img src=&quot;https://diamantidis.github.io/assets/shortcuts/move_focus_to_editor.png&quot; alt=&quot;move focus to editor screenshot&quot; /&gt;
+&lt;/span&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Open is Assistant Editor (&lt;code class=&quot;highlighter-rouge&quot;&gt;⌥&lt;/code&gt; + &lt;code class=&quot;highlighter-rouge&quot;&gt;⌘&lt;/code&gt; + &lt;code class=&quot;highlighter-rouge&quot;&gt;,&lt;/code&gt;) &lt;br /&gt;&lt;span class=&quot;list_item_description&quot;&gt;This can be used, if you are in the navigation controller and you want to open a file to the assistant editor.&lt;/span&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Move focus to next Area (&lt;code class=&quot;highlighter-rouge&quot;&gt;⌥&lt;/code&gt; + &lt;code class=&quot;highlighter-rouge&quot;&gt;⌘&lt;/code&gt; + &lt;code class=&quot;highlighter-rouge&quot;&gt;`&lt;/code&gt;) &lt;br /&gt;&lt;span class=&quot;list_item_description&quot;&gt;It can be used for scenarios when you are in the main editor and you want to move to the assistant editor. Also, (&lt;code class=&quot;highlighter-rouge&quot;&gt;⌥&lt;/code&gt; + &lt;code class=&quot;highlighter-rouge&quot;&gt;⌘&lt;/code&gt; + &lt;code class=&quot;highlighter-rouge&quot;&gt;⇧&lt;/code&gt;  + &lt;code class=&quot;highlighter-rouge&quot;&gt;`&lt;/code&gt;) can be used to move back.&lt;/span&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Center selection (&lt;code class=&quot;highlighter-rouge&quot;&gt;⌃&lt;/code&gt; + &lt;code class=&quot;highlighter-rouge&quot;&gt;L&lt;/code&gt;) &lt;br /&gt;&lt;span class=&quot;list_item_description&quot;&gt;This can be used to move the screen so the selected area is in the center of the screen.&lt;/span&gt;&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;These are only a subset of the available commands that I found really useful. Of course there are plenty more and I am trying to always enrich my list, so feel free to share with me which one you are using.&lt;/p&gt;
+
+&lt;h2 id=&quot;custom-key-bindings&quot;&gt;Custom key bindings&lt;/h2&gt;
+&lt;p&gt;Apart from the already defined key bindings, there is a way to add custom ones. Features like duplication of a line and moving X numbers of lines up or down are some of the key bindings that Xcode doesn’t support.&lt;/p&gt;
+
+&lt;p&gt;To add a custom key binding someone has to follow the next steps:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;Open
+    &lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;/Applications/Xcode.app/Contents/Frameworks/IDEKit.framework/Resources/IDETextKeyBindingSet.plist
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Edit file and add something like the following inside the outer &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;dict&amp;gt;&lt;/code&gt;:
+    &lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;  &amp;lt;key&amp;gt;Custom Key Bindings&amp;lt;/key&amp;gt;
+  &amp;lt;dict&amp;gt;
+      &amp;lt;key&amp;gt;Move 5 lines down&amp;lt;/key&amp;gt;
+      &amp;lt;string&amp;gt;moveDown:, moveDown:, moveDown:, moveDown:, moveDown:&amp;lt;/string&amp;gt;
+      &amp;lt;key&amp;gt;Move 5 lines up&amp;lt;/key&amp;gt;
+      &amp;lt;string&amp;gt;moveUp:, moveUp:, moveUp:, moveUp:, moveUp:&amp;lt;/string&amp;gt;
+      &amp;lt;key&amp;gt;Duplicate current line&amp;lt;/key&amp;gt;
+      &amp;lt;string&amp;gt;selectLine:, copy:, moveToBeginningOfLine:, paste:, moveToEndOfLine:&amp;lt;/string&amp;gt;
+  &amp;lt;/dict&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Restart Xcode&lt;/li&gt;
+  &lt;li&gt;Go to Xcode &amp;gt; Preferences (or better &lt;code class=&quot;highlighter-rouge&quot;&gt;⌘&lt;/code&gt; + &lt;code class=&quot;highlighter-rouge&quot;&gt;,&lt;/code&gt;) &amp;gt; Key bindings&lt;/li&gt;
+  &lt;li&gt;Find the key bindings&lt;/li&gt;
+  &lt;li&gt;Assign a keyboard shortcut and&lt;/li&gt;
+  &lt;li&gt;You can try the new shortcuts :rocket:&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://diamantidis.github.io/assets/shortcuts/custom_key_bindings.png&quot; alt=&quot;custom bindings menu in xcode screenshot&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+&lt;p&gt;Hope you find those shortcuts and start using on your daily routine to save some time. Furthermore, being able to add custom bindings can prove to be really useful especially on cases that are not supported by Xcode and are quite common, like quickly moving up and down on a file.&lt;/p&gt;</content><author><name>Ioannis Diamantidis</name><email>diamantidis@outlook.com</email></author><category term="Xcode" /><category term="Shortcuts" /><category term="Productivity" /><summary type="html">A recent discussion with a colleague about the use of the Xcode shortcuts is the reason behind this blog post.</summary></entry><entry><title type="html">Download provision profiles with applescript</title><link href="https://diamantidis.github.io/2018/11/25/download-provision-profiles-with-applescript" rel="alternate" type="text/html" title="Download provision profiles with applescript" /><published>2018-11-25T06:00:00+00:00</published><updated>2018-11-25T06:00:00+00:00</updated><id>https://diamantidis.github.io/2018/11/25/download-provision-profiles-with-applescript</id><content type="html" xml:base="https://diamantidis.github.io/2018/11/25/download-provision-profiles-with-applescript">&lt;p&gt;In my try to empty my To-do list, one item that caught my attention and I decided to give it a try is Applescript.&lt;/p&gt;
+
+&lt;p&gt;Applescript is a scripting language that allows us to interact with applications and many parts of the Mac OS.
+Well, with applescript you can automate pretty much anything on a Mac OS.&lt;/p&gt;
+
+&lt;p&gt;AppleScript is an English-like language which contains words that are used in the every-day life thus making the writing of a script feels like creating a normal sentence. Due to that, it is quite easy to write, read and understand.&lt;/p&gt;
+
+&lt;p&gt;A few examples of what can be implemented with applescript are the following:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Show notification&lt;/li&gt;
+  &lt;li&gt;Turn sound on and off&lt;/li&gt;
+  &lt;li&gt;Open a program or a file with a specific program&lt;/li&gt;
+  &lt;li&gt;Send an email with the Mail app&lt;/li&gt;
+  &lt;li&gt;Empty the trash&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;An &lt;code class=&quot;highlighter-rouge&quot;&gt;AppleScript&lt;/code&gt; script can be written and run using the &lt;code class=&quot;highlighter-rouge&quot;&gt;Script Editor&lt;/code&gt; application. Alternatively, the &lt;code class=&quot;highlighter-rouge&quot;&gt;osascript&lt;/code&gt; command can be used to run the Applescript “script” like for example &lt;code class=&quot;highlighter-rouge&quot;&gt;osascript -e 'display notification &quot;hello world!&quot;'&lt;/code&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;osascript&quot;&gt;Osascript&lt;/h2&gt;
+
+&lt;p&gt;Osascript is a tool to run any script in an OSA(Open Scripting Architecture) language. More info about OSA can be found &lt;a href=&quot;https://developer.apple.com/library/archive/documentation/AppleScript/Conceptual/AppleScriptX/Concepts/osa.html&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;To find out which OSA languages are installed on your system, you can run the &lt;code class=&quot;highlighter-rouge&quot;&gt;osalang&lt;/code&gt; command. Two of the most popular such languages are &lt;code class=&quot;highlighter-rouge&quot;&gt;AppleScript&lt;/code&gt; and &lt;code class=&quot;highlighter-rouge&quot;&gt;javascript&lt;/code&gt;. The script can either be plain text or a compiled script (.scpt) created by Script Editor or &lt;code class=&quot;highlighter-rouge&quot;&gt;osacompile&lt;/code&gt; command.
+Plain text will be treated as Applescript, unless it is stated differently using the &lt;code class=&quot;highlighter-rouge&quot;&gt;-l&lt;/code&gt; option. For more info about &lt;code class=&quot;highlighter-rouge&quot;&gt;osacript&lt;/code&gt; you can refer to it’s &lt;a href=&quot;https://ss64.com/osx/osascript.html&quot;&gt;man page&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2 id=&quot;a-real-world-example&quot;&gt;A “real world” example&lt;/h2&gt;
+&lt;p&gt;One of the tasks that I found interesting, is to automate the process needed to download and update the provisioning profiles in Xcode.&lt;/p&gt;
+
+&lt;p&gt;The process can be described with the following steps:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;Open Xcode&lt;/li&gt;
+  &lt;li&gt;From the navigation menu, choose Preferences or alternative &lt;code class=&quot;highlighter-rouge&quot;&gt;Command&lt;/code&gt; + &lt;code class=&quot;highlighter-rouge&quot;&gt;,&lt;/code&gt;. A new dialog opens.&lt;/li&gt;
+  &lt;li&gt;Press the option “Accounts” from the the toolbar. The new window contains a list of all the appleIds on the left and details for each of them on the right.&lt;/li&gt;
+  &lt;li&gt;Press the appleId that you want. It opens the details.&lt;/li&gt;
+  &lt;li&gt;On the bottom right corner of the right pane, there is a button “Download Manual Profiles”&lt;/li&gt;
+  &lt;li&gt;Press the button&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;implementation-with-javascript&quot;&gt;Implementation with Javascript&lt;/h2&gt;
+&lt;p&gt;First I start doing the implementation with Javascript, to get a better idea on how it is working.&lt;/p&gt;
+
+&lt;p&gt;The javascript implementation is the following:
+&lt;script src=&quot;https://gist.github.com/0d2a9e28c12d2f1b3d3c02e7f32c7019.js?file=javascript_download_profiles.scpt&quot;&gt; &lt;/script&gt;&lt;/p&gt;
+
+&lt;p&gt;This can be executed by running &lt;code class=&quot;highlighter-rouge&quot;&gt;osascript javascript_download_profiles.scpt&lt;/code&gt;.
+I would say that the documentation was not so good and there are not so many examples available online.&lt;/p&gt;
+
+&lt;p&gt;The library documentation can be found by pressing &lt;code class=&quot;highlighter-rouge&quot;&gt;Shift&lt;/code&gt; + &lt;code class=&quot;highlighter-rouge&quot;&gt;Command&lt;/code&gt; + &lt;code class=&quot;highlighter-rouge&quot;&gt;L&lt;/code&gt; when using the 
+&lt;code class=&quot;highlighter-rouge&quot;&gt;Script Editor&lt;/code&gt;. It contains documentation for both Javascript and Applescript and how to use them to communicate with a lot of Mac OS apps.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/applescript/documentation.png&quot; alt=&quot;script editor's documentation screenshot&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;On the first run of the script, you will get prompted to set Accessibility Access in System Preferences or you will get an error like &lt;code class=&quot;highlighter-rouge&quot;&gt;... execution error: Error on line X: Error: osascript is not allowed to send keystrokes. (1002)&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;To do so, go to &lt;code class=&quot;highlighter-rouge&quot;&gt;System Preferences&lt;/code&gt; &amp;gt; &lt;code class=&quot;highlighter-rouge&quot;&gt;Security &amp;amp; Privacy&lt;/code&gt; &amp;gt; &lt;code class=&quot;highlighter-rouge&quot;&gt;Privacy&lt;/code&gt; &amp;gt; &lt;code class=&quot;highlighter-rouge&quot;&gt;Accessibility&lt;/code&gt; and select the programs that you choose to run the script&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/applescript/accessibility_permissions.png&quot; alt=&quot;Accessibility permissions screenshot&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;implementation-with-applescript&quot;&gt;Implementation with Applescript&lt;/h2&gt;
+
+&lt;p&gt;After facing these issues with Javascript, I was more confident to start the applescript implementation which is the following:&lt;/p&gt;
+
+&lt;script src=&quot;https://gist.github.com/c688cc192d9d525248f55da6602fb4ad.js?file=applescript_download_profiles.scpt&quot;&gt; &lt;/script&gt;
+
+&lt;p&gt;This can be executed by running &lt;code class=&quot;highlighter-rouge&quot;&gt;osascript applescript_download_profiles.scpt&lt;/code&gt;.&lt;/p&gt;
+
+&lt;h2 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+&lt;p&gt;It’s always nice to experiment with technologies that you haven’t use before and at the same time to explore new options and possibilities to make your life easier by enabling you to automate processes. This post only scratches the surface of the applescript capabilities and I am looking forward to start using applescript to automate tasks that I do quite often. Furthermore, it is a great opportunity to get a better idea on how it works underneath with use of the apple events, Open Scripting Architecture and the language components.&lt;/p&gt;</content><author><name>Ioannis Diamantidis</name><email>diamantidis@outlook.com</email></author><category term="Applescript" /><category term="Xcode" /><category term="Javascript" /><category term="OSA" /><summary type="html">In my try to empty my To-do list, one item that caught my attention and I decided to give it a try is Applescript.</summary></entry><entry><title type="html">Save time with git aliases</title><link href="https://diamantidis.github.io/2018/11/10/save-time-with-git-aliases" rel="alternate" type="text/html" title="Save time with git aliases" /><published>2018-11-10T06:02:00+00:00</published><updated>2018-11-10T06:02:00+00:00</updated><id>https://diamantidis.github.io/2018/11/10/save-time-with-git-aliases</id><content type="html" xml:base="https://diamantidis.github.io/2018/11/10/save-time-with-git-aliases">&lt;p&gt;This is a blog post for those that don’t like using the computer mouse or trackpad, those who don’t use &lt;a href=&quot;https://www.sourcetreeapp.com/&quot;&gt;Sourcetree&lt;/a&gt; or other version-control tools to manage a repository.
+The fans of the command line. Are you tired of writing these long commands like &lt;code class=&quot;highlighter-rouge&quot;&gt;git push --set-upstream&lt;/code&gt; when you have to push a new branch to remote? One of the solutions that will save those precious seconds while typing these git commands is git aliases. :rocket:&lt;/p&gt;
+
+&lt;h2 id=&quot;add-git-alias&quot;&gt;Add git alias&lt;/h2&gt;
+&lt;p&gt;The simplest way to add a git alias is by running a command to add the alias to the git global configuration file.
+For example, running the command &lt;code class=&quot;highlighter-rouge&quot;&gt;git config --global alias.hist &quot;log --pretty=format:'%h %ad | %s%d [%an]' --graph --date=short&quot;&lt;/code&gt; will add the alias &lt;code class=&quot;highlighter-rouge&quot;&gt;git hist&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Alternatively, you can edit the git config file, usually located at &lt;code class=&quot;highlighter-rouge&quot;&gt;~/.gitconfig&lt;/code&gt;.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Hint:&lt;/code&gt; The location of the file can be found by running: &lt;code class=&quot;highlighter-rouge&quot;&gt;git config --list --show-origin&lt;/code&gt; or by running &lt;code class=&quot;highlighter-rouge&quot;&gt;git config --global -e&lt;/code&gt;. The first command will list all the git-related configuration, along with the file they are placed, and the second command will open the global config file for edit with the default editor.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://diamantidis.github.io/assets/git_aliases/git_config_list.png&quot; alt=&quot;Git Config list screenshot&quot; /&gt;
+&lt;sub&gt;&lt;sup&gt;Screenshot for &lt;code class=&quot;highlighter-rouge&quot;&gt;git config --list --show-origin&lt;/code&gt;&lt;/sup&gt;&lt;/sub&gt;
+&lt;img src=&quot;https://diamantidis.github.io/assets/git_aliases/git_config_global_e.png&quot; alt=&quot;Git Config global -e screenshot&quot; /&gt;
+&lt;sub&gt;&lt;sup&gt;Screenshot for &lt;code class=&quot;highlighter-rouge&quot;&gt;git config --global -e&lt;/code&gt;&lt;/sup&gt;&lt;/sub&gt;&lt;/p&gt;
+
+&lt;p&gt;To add an alias to the global git config file, you can simply add a section for alias (if it doesn’t exist) and start writing your aliases like:&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;[alias]
+  co = checkout
+  c = commit
+  s = status
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://diamantidis.github.io/assets/git_aliases/git_config_aliases.png&quot; alt=&quot;Git Config aliases screenshot&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;shell-level-aliases&quot;&gt;Shell level aliases&lt;/h2&gt;
+&lt;p&gt;If your shell supports aliases or shortcuts, you can add aliases on this level, too. For example, edit the &lt;code class=&quot;highlighter-rouge&quot;&gt;.bash_profile&lt;/code&gt; by running the command
+&lt;code class=&quot;highlighter-rouge&quot;&gt;vim  ~/.bash_profile&lt;/code&gt; (or create if it doesn’t exist by running &lt;code class=&quot;highlighter-rouge&quot;&gt;touch ~/.bash_profile&lt;/code&gt;) and add some aliases like:&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;alias g='git'
+alias ga='git add'
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://diamantidis.github.io/assets/git_aliases/bash_profile.png&quot; alt=&quot;Bash profile screenshot&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;After saving and exiting, run &lt;code class=&quot;highlighter-rouge&quot;&gt;source ~/.bash_profile&lt;/code&gt; or &lt;code class=&quot;highlighter-rouge&quot;&gt;. ~/.bash_profile&lt;/code&gt; to source the modified file.&lt;/p&gt;
+
+&lt;h2 id=&quot;is-there-anything-more&quot;&gt;Is there anything more?&lt;/h2&gt;
+&lt;p&gt;The answer is yes. &lt;a href=&quot;https://github.com/robbyrussell/oh-my-zsh&quot;&gt;Oh-my-zsh&lt;/a&gt;. Above all the others (one of their selling point that I like is &lt;code class=&quot;highlighter-rouge&quot;&gt;Oh My Zsh will not make you a 10x developer...but you might feel like one.&lt;/code&gt;), it comes by default with a git plugin with all these aliases installed. All the list of the available aliases can be found in their &lt;a href=&quot;https://github.com/robbyrussell/oh-my-zsh/wiki/Plugin:git&quot;&gt;documentation&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;The only thing you have to do is to enable it in the &lt;code class=&quot;highlighter-rouge&quot;&gt;.zshrc&lt;/code&gt; file by editing this file and more precisely the &lt;code class=&quot;highlighter-rouge&quot;&gt;plugins&lt;/code&gt; sector to add the git plugin, like in the screenshot below.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://diamantidis.github.io/assets/git_aliases/oh_my_zsh_plugins.png&quot; alt=&quot;Oh-my-zsh plugins screenshot&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Then, you have to source the file by running either &lt;code class=&quot;highlighter-rouge&quot;&gt;source ~/.zshrc&lt;/code&gt; or &lt;code class=&quot;highlighter-rouge&quot;&gt;. ~/.zshrc&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;The next step is to learn the commands and start using them. :smile:&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Oh My Zsh, apart from the &lt;code class=&quot;highlighter-rouge&quot;&gt;git&lt;/code&gt; plugin, contains by default a  huge list of useful plugins. The list can be found &lt;a href=&quot;https://github.com/robbyrussell/oh-my-zsh/wiki/Plugins&quot;&gt;here&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h2 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+
+&lt;p&gt;Writing git commands on a Terminal is an integral part of my daily routine, so improving this part leads to a better daily programming experience. Saving a few keystrokes here and there, doesn’t seem so, but in the long run, it saves a lot of time. Furthermore, as the commands are shorter, it lowers the risk of typos like &lt;code class=&quot;highlighter-rouge&quot;&gt;git chekcout&lt;/code&gt; :smile:. Last but not least, it is kind of cool and hackish to run these shortcuts, especially when running them in front of others who do have to type the full git commands to stage, commit and push files. :computer:&lt;/p&gt;
+
+&lt;p&gt;I hope that you find it interesting and you will start using the git aliases on your daily routine from now on!&lt;/p&gt;</content><author><name>Ioannis Diamantidis</name><email>diamantidis@outlook.com</email></author><category term="Git" /><category term="Productivity" /><summary type="html">This is a blog post for those that don’t like using the computer mouse or trackpad, those who don’t use Sourcetree or other version-control tools to manage a repository. The fans of the command line. Are you tired of writing these long commands like git push --set-upstream when you have to push a new branch to remote? One of the solutions that will save those precious seconds while typing these git commands is git aliases. :rocket:</summary></entry><entry><title type="html">Why I choose Jekyll over competition</title><link href="https://diamantidis.github.io/2018/10/23/why-i-choose-jekyll-over-competition" rel="alternate" type="text/html" title="Why I choose Jekyll over competition" /><published>2018-10-23T06:02:00+00:00</published><updated>2018-10-23T06:02:00+00:00</updated><id>https://diamantidis.github.io/2018/10/23/why-i-choose-jekyll-over-competition</id><content type="html" xml:base="https://diamantidis.github.io/2018/10/23/why-i-choose-jekyll-over-competition">&lt;p&gt;A few months ago, I took the decision that I wanted to start writing some articles. At that time, one of the first things to consider, and that would definitely affect my efforts, was the decision of the platform where I would host the posts. The options were countless. For this reason, I created a list of criteria that were important to me, and based on those I came to the decision to try Jekyll.&lt;/p&gt;
+
+&lt;p&gt;Those criteria are:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Ability to customize the look and feel&lt;/li&gt;
+  &lt;li&gt;Easy of setup and time to publish&lt;/li&gt;
+  &lt;li&gt;Thriving and big community&lt;/li&gt;
+  &lt;li&gt;Easy to use&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;customization&quot;&gt;Customization&lt;/h2&gt;
+&lt;p&gt;One of the most important must-have for me was the ability to apply my personal look and feel and to able to experiment with the UI.
+Changing the theme, the structure, the fonts and the colors can best reflect the writers personality and personal taste.
+Given that, I rejected platforms like &lt;a href=&quot;https://medium.com&quot;&gt;Medium&lt;/a&gt;, though I understand that by doing so I miss a huge pool of potential readers.&lt;/p&gt;
+
+&lt;h2 id=&quot;easy-of-setup-and-time-to-publish&quot;&gt;Easy of setup and time to publish&lt;/h2&gt;
+
+&lt;p&gt;Another important aspect was the effort needed to setup and also how long it would take to actually be ready to publish the blog and ultimately start writing the content.
+From this point of view, CMS solutions like &lt;a href=&quot;https://wordpress.org&quot;&gt;Wordpress&lt;/a&gt; or &lt;a href=&quot;https://www.drupal.org&quot;&gt;Drupal&lt;/a&gt; would be an overkill. My main purpose was to share my ideas and thoughts by writing content and not developing yet another website.&lt;/p&gt;
+
+&lt;p&gt;I cannot overlook the advantages and the wide range of features that these tools offer, but at that point, I felt that having to support a database and all the security risks that come with such a decision, was not necessary. Maybe for a non-technical person, features like the admin panel, the use of &lt;code class=&quot;highlighter-rouge&quot;&gt;WYSIWYG&lt;/code&gt; editors  or the built-in newsletter feature is the whole deal, but for me that was not the case.&lt;/p&gt;
+
+&lt;h2 id=&quot;big-community&quot;&gt;Big community&lt;/h2&gt;
+&lt;p&gt;Having ruled out proprietary systems and CMS solutions, I was pretty much left with the option of using a static generator. Building a personal blog on a system that is supported by a vast community of developers can determine the ability to quickly adapt to future needs and technologies that will come up in our ever-changing world. Given that, the two of the most prominent such tools are &lt;a href=&quot;https://gohugo.io&quot;&gt;Hugo&lt;/a&gt; and &lt;a href=&quot;https://jekyllrb.com/&quot;&gt;Jekyll&lt;/a&gt;.&lt;/p&gt;
+
+&lt;div class=&quot;github-card&quot; data-github=&quot;jekyll/jekyll&quot; data-width=&quot;400&quot; data-height=&quot;153&quot; data-theme=&quot;default&quot;&gt;&lt;/div&gt;
+&lt;script src=&quot;https://cdn.jsdelivr.net/github-cards/latest/widget.js&quot;&gt;&lt;/script&gt;
+
+&lt;div class=&quot;github-card&quot; data-github=&quot;gohugoio/hugo&quot; data-width=&quot;400&quot; data-height=&quot;153&quot; data-theme=&quot;default&quot;&gt;&lt;/div&gt;
+&lt;script src=&quot;https://cdn.jsdelivr.net/github-cards/latest/widget.js&quot;&gt;&lt;/script&gt;
+
+&lt;h2 id=&quot;easy-to-use&quot;&gt;Easy to use&lt;/h2&gt;
+&lt;p&gt;One more decisive factor was the easy to use. Both when the developing the platform and when writing a new blogpost. 
+Comparing Hugo and Jekyll on the process of creating, writing and publishing a post is almost familiar. Both support Markdown and they both provide some command line interface to create a new post (though I have to admit that to do so on Jekyll you have to install a plugin). Maybe there are some points in favor of Hugo when it comes to speed, but with the amount of posts that I hope to write in the coming 2 years, this advantage is not so important.&lt;/p&gt;
+
+&lt;p&gt;Then, it comes to how to theme the blog. And here, Jekyll and more precisely the template engine that it uses, makes the different for me. 
+Based on my personal preferences &lt;a href=&quot;https://shopify.github.io/liquid/&quot;&gt;Liquid&lt;/a&gt; seemed a bit more intuitive than &lt;a href=&quot;https://golang.org/pkg/html/template/&quot;&gt;Go Template&lt;/a&gt;. 
+Maybe having worked a lot with &lt;a href=&quot;https://symfony.com/&quot;&gt;Symfony&lt;/a&gt; and &lt;a href=&quot;https://www.drupal.org/8&quot;&gt;Drupal 8&lt;/a&gt; and the template engine that they are based on, named &lt;a href=&quot;https://twig.symfony.com/&quot;&gt;Twig&lt;/a&gt;, affected my judge, since they look familiar. Also having more experience in Ruby and its ecosystem compared to the equivalent of Go further adds to this.&lt;/p&gt;
+
+&lt;p&gt;The important for me was that it enables me to create a rapid prototype and start focusing on the content quite fast.&lt;/p&gt;
+
+&lt;p&gt;Maybe in the future, and if I gain more knowledge and experience in the Go community, I will change my mind, but since then I will continue with Jekyll.&lt;/p&gt;
+
+&lt;h2 id=&quot;jekyll&quot;&gt;Jekyll&lt;/h2&gt;
+&lt;p&gt;My experience so far with Jekyll is amazing and on par with my expectations. One of the greatest positives is that it supports hosting in Github Pages and due to that there are a lot of resources and ideas on how to automate the release and the publication of the changes automatically by taking advantage of the &lt;a href=&quot;https://travis-ci.org/&quot;&gt;Travis CI&lt;/a&gt;. Furthermore, the thriving community of Jekyll offers a wide variety of plugins to support the features that any developer may face.&lt;/p&gt;
+
+&lt;h2 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+&lt;p&gt;And this is the story and the decision process that I followed to end up choosing to use Jekyll. Maybe some time in the future I will have to move to another platform, but for now, Jekyll gives me the opportunity to focus on writing content instead of supporting the platform. Anyhow, I believe that having so many products competing each other is beneficial for everyone in the community as they are trying to provide a better offering and gain a bigger percentage of the pie.&lt;/p&gt;
+
+&lt;p&gt;Finally, I believe that everyone (or better those that are interested and want to) should try and start a new blog, and most preferably a custom one, to better share their personality with the rest of the world, not only by their writings but also with the look and feel of their blog.&lt;/p&gt;</content><author><name>Ioannis Diamantidis</name><email>diamantidis@outlook.com</email></author><category term="Jekyll" /><category term="personal" /><category term="blog" /><summary type="html">A few months ago, I took the decision that I wanted to start writing some articles. At that time, one of the first things to consider, and that would definitely affect my efforts, was the decision of the platform where I would host the posts. The options were countless. For this reason, I created a list of criteria that were important to me, and based on those I came to the decision to try Jekyll.</summary></entry><entry><title type="html">Modifying UI elements with Xcode and LLDB v2</title><link href="https://diamantidis.github.io/2018/10/14/modifying-ui-elements-with-xcode-and-lldb-v2" rel="alternate" type="text/html" title="Modifying UI elements with Xcode and LLDB v2" /><published>2018-10-14T06:02:00+00:00</published><updated>2018-10-14T06:02:00+00:00</updated><id>https://diamantidis.github.io/2018/10/14/modifying-ui-elements-with-xcode-and-lldb-v2</id><content type="html" xml:base="https://diamantidis.github.io/2018/10/14/modifying-ui-elements-with-xcode-and-lldb-v2">&lt;p&gt;In a &lt;a href=&quot;/2018/09/30/modifying-ui-elements-with-lldb&quot;&gt;previous post&lt;/a&gt;, I wrote an introduction about the use of LLDB expressions to modify the UI elements. In this post, I will continue on the same topics and I will focus on how to get the most out of the LLDB expressions. 
+No tool will ever work and get user adoption if it is too complicated. 
+For this reason, I will write about a number of alternatives to make LLDB expressions easier to use.&lt;/p&gt;
+
+&lt;h2 id=&quot;command-aliases&quot;&gt;Command aliases&lt;/h2&gt;
+&lt;p&gt;First and foremost, having to type (or copy) a command of this length (e.g &lt;code class=&quot;highlighter-rouge&quot;&gt;po [[[UIApplication sharedApplication] keyWindow] recursiveDescription]&lt;/code&gt;) may discourage developers from using these LLDB commands. Fortunately, there is a solution to this problem.&lt;/p&gt;
+
+&lt;p&gt;It is called &lt;code class=&quot;highlighter-rouge&quot;&gt;Command Aliases&lt;/code&gt;.
+The only thing needed is to edit a file located in the directory &lt;code class=&quot;highlighter-rouge&quot;&gt;~/.lldbinit&lt;/code&gt;(or create it if not there, by typing &lt;code class=&quot;highlighter-rouge&quot;&gt;touch ~/.lldbinit&lt;/code&gt;) and add the commands like:&lt;/p&gt;
+
+&lt;div class=&quot;language-sh highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nb&quot;&gt;command alias &lt;/span&gt;views expression &lt;span class=&quot;nt&quot;&gt;-l&lt;/span&gt; objc &lt;span class=&quot;nt&quot;&gt;-O&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;--&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;[[[&lt;/span&gt;UIApplication sharedApplication] keyWindow] recursiveDescription]
+
+&lt;span class=&quot;nb&quot;&gt;command alias &lt;/span&gt;flush expression &lt;span class=&quot;nt&quot;&gt;-l&lt;/span&gt; objc &lt;span class=&quot;nt&quot;&gt;--&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;void&lt;span class=&quot;o&quot;&gt;)[&lt;/span&gt;CATransaction flush]
+&lt;span class=&quot;nb&quot;&gt;command &lt;/span&gt;regex change_color &lt;span class=&quot;s1&quot;&gt;'s/(.+) (.+)/e (void)[(id)%1 setBackgroundColor:[UIColor %2]]/'&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;The first two commands are already described in the previous post. The first one is to print the view hierarchy and from there get the memory address of the button, and the second one is to refresh the UI.&lt;/p&gt;
+
+&lt;p&gt;The last one is an example of how to use &lt;code class=&quot;highlighter-rouge&quot;&gt;regex&lt;/code&gt; to create a command with parameters. In this particular case, a memory address and the name of the color (blueColor) is expected. As an outcome, the background color of the button will change.
+For example, running &lt;code class=&quot;highlighter-rouge&quot;&gt;change_color 0x7f9f7e40cd70  blueColor&lt;/code&gt; and &lt;code class=&quot;highlighter-rouge&quot;&gt;flush&lt;/code&gt; will result in changing the background color of the button to blue.&lt;/p&gt;
+
+&lt;p&gt;Making use of the aliases will improve the possibility of using this tool, but there are cases where more advanced aliases are needed.
+Let’s say, how to find the button’s memory address by the text of the button label.&lt;/p&gt;
+
+&lt;p&gt;In such cases, Python comes to the rescue to provide extendability.&lt;/p&gt;
+
+&lt;h2 id=&quot;lldb-and-python&quot;&gt;LLDB and Python&lt;/h2&gt;
+
+&lt;p&gt;An easy way to start writing a python command is to use the Xcode console and just type &lt;code class=&quot;highlighter-rouge&quot;&gt;command script add help&lt;/code&gt; and follow the instructions.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://diamantidis.github.io/assets/lldb2/script_add_help_commmand.png&quot; alt=&quot;command script add help screenshot&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Alternatively, you can create a script file, that can be added to the repo and a version control system, and then run the command &lt;code class=&quot;highlighter-rouge&quot;&gt;command script import &amp;lt;script_file_path&amp;gt;&lt;/code&gt; on the Xcode console or better add it to the &lt;code class=&quot;highlighter-rouge&quot;&gt;~/.lldbinit&lt;/code&gt; file.&lt;/p&gt;
+
+&lt;p&gt;To write a python function that will be used as a new LLDB command, a function that takes four arguments should be implemented:&lt;/p&gt;
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;command_function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;debugger&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;command&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;result&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;internal_dict&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;# Your code goes here&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;The type and the description of each of these variables, according to the &lt;a href=&quot;https://lldb.llvm.org/python-reference.html&quot;&gt;LLDB python reference&lt;/a&gt;, is the following:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;debugger&lt;/code&gt; (type: &lt;code class=&quot;highlighter-rouge&quot;&gt;lldb.SBDebugger&lt;/code&gt;): The current debugger object.&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;command&lt;/code&gt; (type: &lt;code class=&quot;highlighter-rouge&quot;&gt;python string&lt;/code&gt;): A python string containing all arguments for your command. If you need to chop up the arguments try using the shlex module’s shlex.split(command) to properly extract the arguments.&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;result&lt;/code&gt; (type: &lt;code class=&quot;highlighter-rouge&quot;&gt;lldb.SBCommandReturnObject&lt;/code&gt;): A return object which encapsulates success/failure information for the command and output text that needs to be printed as a result of the command. The plain Python “print” command also works but text won’t go in the result by default (it is useful as a temporary logging facility).&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;internal_dict&lt;/code&gt; (type: &lt;code class=&quot;highlighter-rouge&quot;&gt;python dict object&lt;/code&gt;): The dictionary for the current embedded script session which contains all variables and functions.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;If you are using the &lt;code class=&quot;highlighter-rouge&quot;&gt;command script import&lt;/code&gt; approach, you can define the function &lt;code class=&quot;highlighter-rouge&quot;&gt;__lldb_init_module&lt;/code&gt; like below:&lt;/p&gt;
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;__lldb_init_module&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;debugger&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;internal_dict&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;# Command Initialization code goes here&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;debugger&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;HandleCommand&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'command script add -f filter.filter_button_by_label filter_button_by_label'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;where debugger and internal_dict are as above.&lt;/p&gt;
+
+&lt;p&gt;This function will get called when the module is loaded allowing you to add whatever commands you want into the current debugger.&lt;/p&gt;
+
+&lt;p&gt;The description of the argument of the &lt;code class=&quot;highlighter-rouge&quot;&gt;debugger.HandleCommand&lt;/code&gt; is the following:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;command script add&lt;/code&gt;: LLDB command to add a script.&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;-f argument&lt;/code&gt;: Specifies the name of the Python function that the command will execute. It follows the format &lt;code class=&quot;highlighter-rouge&quot;&gt;{module name}.{function name}&lt;/code&gt;.&lt;br /&gt;
+In the example above:
+    &lt;ul&gt;
+      &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;filter&lt;/code&gt;: is the name of the module (in Python is just the file name without the .py extension)&lt;/li&gt;
+      &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;filter_button_by_label&lt;/code&gt;: is the command function. (the one described previously as &lt;code class=&quot;highlighter-rouge&quot;&gt;command_function(debugger, command, result, internal_dict)&lt;/code&gt;)&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;last argument&lt;/code&gt; (for example, &lt;code class=&quot;highlighter-rouge&quot;&gt;filter_button_by_label&lt;/code&gt;): is the command that will be used in the Xcode console to invoke this function.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;The full example can be found in the following gist:&lt;/p&gt;
+
+&lt;script src=&quot;https://gist.github.com/d95531fd571c360078fcc795d1967ded.js?file=filter.py&quot;&gt; &lt;/script&gt;
+
+&lt;p&gt;This is an example of how to get the memory address of a button from the text of the button label. It can be called like &lt;code class=&quot;highlighter-rouge&quot;&gt;filter_button_by_label -n &quot;Press me&quot;&lt;/code&gt; and it will return the memory address of that button.&lt;/p&gt;
+
+&lt;p&gt;So the whole flow of changing the color of a button has changed to:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://diamantidis.github.io/assets/lldb2/final_commands.png&quot; alt=&quot;final flow to change button screenshot&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;which is much shorter and easier to remember and therefore use compared to the first implementation.&lt;/p&gt;
+
+&lt;h2 id=&quot;chisel&quot;&gt;&lt;a href=&quot;https://github.com/facebook/chisel&quot;&gt;Chisel&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;Above all these, there is already an open sourced collection of LLDB commands provided by Facebook, named &lt;a href=&quot;https://github.com/facebook/chisel&quot;&gt;Chisel&lt;/a&gt;.
+It provides a plethora of commands that probably solves most of the problems any iOS developer may face.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Hint: If you find Chisel interesting and you would like to contribute or somehow redistribute it, spend some time reading the &lt;a href=&quot;https://github.com/facebook/chisel/blob/master/CONTRIBUTING.md&quot;&gt;contributing documentation&lt;/a&gt; and the &lt;a href=&quot;https://github.com/facebook/chisel/blob/master/LICENSE&quot;&gt;license&lt;/a&gt;.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Two of my favourite commands are the following:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;findinstances&lt;/code&gt; which can be used to find instances of specified ObjC classes, and&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;pcurl&lt;/code&gt; which can be used to print the NSURLRequest as curl command, that can later be used for debugging purposes.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+
+&lt;p&gt;That’s it for now!! I chose to write those two posts regarding LLDB expressions, because I am an advocate of always trying to improve the workflow and remove some of the burdens that come “by default” with each tool.&lt;/p&gt;
+
+&lt;p&gt;Furthermore, I decided to follow this flow and not just mention the final solution or just a tool, because digging deeper and understanding how the tools work and how they are built has each own benefits. Reinventing the wheel is not always the right approach to solve some problems, but most of the time is at least educational and enjoyable. Last but not least, by acquiring this knowledge, someone not only makes his life easier when working on UI changes, but also can improve his skills in other areas (e.g. LLDB, Python) and ultimately get a greater confidence on his skills and the ability to overcome any problems that may arise.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;There is nothing impossible to him who will try.&lt;/p&gt;
+  &lt;ul&gt;
+    &lt;li&gt;Alexander the Great&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/blockquote&gt;</content><author><name>Ioannis Diamantidis</name><email>diamantidis@outlook.com</email></author><category term="iOS" /><category term="Xcode" /><category term="LLDB" /><category term="Python" /><summary type="html">In a previous post, I wrote an introduction about the use of LLDB expressions to modify the UI elements. In this post, I will continue on the same topics and I will focus on how to get the most out of the LLDB expressions. No tool will ever work and get user adoption if it is too complicated. For this reason, I will write about a number of alternatives to make LLDB expressions easier to use.</summary></entry><entry><title type="html">Modifying UI elements with LLDB</title><link href="https://diamantidis.github.io/2018/09/30/modifying-ui-elements-with-lldb" rel="alternate" type="text/html" title="Modifying UI elements with LLDB" /><published>2018-09-30T08:48:00+00:00</published><updated>2018-09-30T08:48:00+00:00</updated><id>https://diamantidis.github.io/2018/09/30/modifying-ui-elements-with-lldb</id><content type="html" xml:base="https://diamantidis.github.io/2018/09/30/modifying-ui-elements-with-lldb">&lt;p&gt;Have you ever been in a situation where you have to experiment with UI and change colors frequent? 
+Does the designer or PM asks for changes in font sizes and you don’t want to stuck in the loop of&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;while(!designer.isSatisfied) {
+    doChanges()
+    build()
+    run()
+    demo()
+} 
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;Imagine that you have something like the inspect element tools of a browser for iOS and 
+an alternative to javascript to change the UI elements of the screen on the fly without having to rebuild the project.&lt;/p&gt;
+
+&lt;p&gt;Using &lt;code class=&quot;highlighter-rouge&quot;&gt;LLDB expressions&lt;/code&gt; is the answer to this problem. &lt;a href=&quot;http://lldb.llvm.org/&quot;&gt;LLDB&lt;/a&gt; is the default debugger in Xcode.
+With LLDB expressions, it is possible to modify the UI of a running app without changing a single line of code.&lt;/p&gt;
+
+&lt;h2 id=&quot;basic-commands&quot;&gt;Basic commands&lt;/h2&gt;
+
+&lt;p&gt;To be able to run an LLDB expression, you only have to press the pause button on tool bar. 
+&lt;img src=&quot;https://diamantidis.github.io/assets/lldb/pause_button.png&quot; alt=&quot;Pause button screenshot&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;In the debugger area, on the bottom right corner, there is a command line prompt.
+There, the LLDB expressions are entered. You can start by typing &lt;code class=&quot;highlighter-rouge&quot;&gt;help&lt;/code&gt; to see the range of the available commands. Also by running &lt;code class=&quot;highlighter-rouge&quot;&gt;help &amp;lt;command&amp;gt;&lt;/code&gt;, some information about this command will be presented.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://diamantidis.github.io/assets/lldb/help_command.png&quot; alt=&quot;Help Command screenshot&quot; /&gt;&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Hint: You can even type &lt;code class=&quot;highlighter-rouge&quot;&gt;help help&lt;/code&gt; to see what &lt;code class=&quot;highlighter-rouge&quot;&gt;help&lt;/code&gt; command does. :stuck_out_tongue_closed_eyes:&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Another useful command is the command &lt;code class=&quot;highlighter-rouge&quot;&gt;print&lt;/code&gt; which is simply printing values.
+You can use this command when using a breakpoint and you want to see the value of a variable. The result of printing, except from the value of the variable, has another value, like for example &lt;code class=&quot;highlighter-rouge&quot;&gt;$R0&lt;/code&gt;. You can use this as a reference for the value. For example, you can try &lt;code class=&quot;highlighter-rouge&quot;&gt;print $R0 + 1&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;One more command is the &lt;code class=&quot;highlighter-rouge&quot;&gt;expression&lt;/code&gt;, which can be use to modify (and not only) some value.
+If you have a variable &lt;code class=&quot;highlighter-rouge&quot;&gt;var foo = &quot;bar&quot;&lt;/code&gt;, and you have a breakpoint after this command, you can modify the value by running &lt;code class=&quot;highlighter-rouge&quot;&gt;expression foo = &quot;hoo&quot;&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://diamantidis.github.io/assets/lldb/print_command.png&quot; alt=&quot;Print and Expression Command screenshot&quot; /&gt;&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Hint: You can also create temporal variable for debugging by running &lt;code class=&quot;highlighter-rouge&quot;&gt;expression int $variable = 1&lt;/code&gt;. The variables are defined in the same way they are defined in C.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Hint: &lt;code class=&quot;highlighter-rouge&quot;&gt;$&lt;/code&gt; is used in the name of the variable in order to be available in subsequent expressions. Otherwise, it would be available only for the expression it is defined.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Besides than, &lt;code class=&quot;highlighter-rouge&quot;&gt;expression&lt;/code&gt; supports the use of many flags too. You can find more information about the &lt;code class=&quot;highlighter-rouge&quot;&gt;expression&lt;/code&gt; command and the flags by typing &lt;code class=&quot;highlighter-rouge&quot;&gt;help expression&lt;/code&gt;. Actually, &lt;code class=&quot;highlighter-rouge&quot;&gt;print&lt;/code&gt; command is an abbreviation for &lt;code class=&quot;highlighter-rouge&quot;&gt;expression --&lt;/code&gt;. The use of &lt;code class=&quot;highlighter-rouge&quot;&gt;--&lt;/code&gt; signifies the end of flags and the beginning of input, so the commands &lt;code class=&quot;highlighter-rouge&quot;&gt;print 1&lt;/code&gt; and &lt;code class=&quot;highlighter-rouge&quot;&gt;expression -- 1&lt;/code&gt; are equivalent.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Hint: &lt;code class=&quot;highlighter-rouge&quot;&gt;p&lt;/code&gt; and &lt;code class=&quot;highlighter-rouge&quot;&gt;e&lt;/code&gt; can be used as aliases for &lt;code class=&quot;highlighter-rouge&quot;&gt;print&lt;/code&gt; and &lt;code class=&quot;highlighter-rouge&quot;&gt;expression&lt;/code&gt; commands respectively.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;A disadvantage of the &lt;code class=&quot;highlighter-rouge&quot;&gt;print&lt;/code&gt; command is when printing objects. For example, &lt;code class=&quot;highlighter-rouge&quot;&gt;p @[ @1, @2 ]&lt;/code&gt; will result in &lt;code class=&quot;highlighter-rouge&quot;&gt;(__NSArrayI *) $0 = 0x0000600001644560 @&quot;2 elements&quot;&lt;/code&gt;, which doesn’t give a lot of information about the object itself.&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;expression&lt;/code&gt;command comes to our rescue and with the use of the flag &lt;code class=&quot;highlighter-rouge&quot;&gt;-O&lt;/code&gt;, prints the result as an object. So, for the above mentioned example &lt;code class=&quot;highlighter-rouge&quot;&gt;e -O --  @[ @1, @2 ]&lt;/code&gt; will result in&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&amp;lt;__NSArrayI 0x600001640b40&amp;gt;(
+1,
+2
+)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Don’t worry though, you don’t have to type &lt;code class=&quot;highlighter-rouge&quot;&gt;e -O --&lt;/code&gt; every time you have to print an object, as it also comes with an alias &lt;code class=&quot;highlighter-rouge&quot;&gt;po&lt;/code&gt;(as of print object), so &lt;code class=&quot;highlighter-rouge&quot;&gt;po @[ @1, @2 ]&lt;/code&gt; can be used instead.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://diamantidis.github.io/assets/lldb/printing_objects.png&quot; alt=&quot;Printing objects screenshot&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Knowing this, we can proceed to more advanced usage and combination of these commands to reach our goal.&lt;/p&gt;
+
+&lt;h2 id=&quot;advanced-commands&quot;&gt;Advanced commands&lt;/h2&gt;
+
+&lt;p&gt;As in the previous example, &lt;code class=&quot;highlighter-rouge&quot;&gt;po&lt;/code&gt; command can be used to print Objective-C expressions, thus it can be used to print all the information about the view hierarchy on a running application. 
+By running &lt;code class=&quot;highlighter-rouge&quot;&gt;po [[[UIApplication sharedApplication] keyWindow] recursiveDescription]&lt;/code&gt;, you can see all the view in the view hierarchy along with their memory address and their layout.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://diamantidis.github.io/assets/lldb/view_hierarchy.png&quot; alt=&quot;Printing view hierarchy screenshot&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Then, by using the &lt;code class=&quot;highlighter-rouge&quot;&gt;expression&lt;/code&gt; we can create a variable from the memory address. By running the command  &lt;code class=&quot;highlighter-rouge&quot;&gt;e id $myButton = (id)0x7fb3e3608520&lt;/code&gt;, the button is assign to the variable &lt;code class=&quot;highlighter-rouge&quot;&gt;$myButton&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Next, we want to modify the color of the button, again by using the &lt;code class=&quot;highlighter-rouge&quot;&gt;expression&lt;/code&gt; command. &lt;code class=&quot;highlighter-rouge&quot;&gt;e (void)[$myButton setBackgroundColor:[UIColor blueColor]]&lt;/code&gt; will do the job.&lt;/p&gt;
+
+&lt;p&gt;Last but not least, we have to refresh the UI to be able to see the change. This can be done by running &lt;code class=&quot;highlighter-rouge&quot;&gt;e (void)[CATransaction flush]&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://diamantidis.github.io/assets/lldb/changing_button_background_commands.png&quot; alt=&quot;Changing button background commands screenshot&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;And voilà, that’s it, the UIButton now has blue background!! :tada:&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th style=&quot;text-align: center&quot;&gt;Initial button&lt;/th&gt;
+      &lt;th style=&quot;text-align: center&quot;&gt;Final Button&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;&lt;img src=&quot;https://diamantidis.github.io/assets/lldb/initial_button.png&quot; alt=&quot;Initial button screenshot&quot; /&gt;&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;&lt;img src=&quot;https://diamantidis.github.io/assets/lldb/final_button.png&quot; alt=&quot;Final button screenshot&quot; /&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;h2 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+
+&lt;p&gt;So far, so good, our goal is reached and we can call it a day. But this post only scratches the surface of LLDB capabilities and more posts are to come on this topic.&lt;/p&gt;
+
+&lt;p&gt;Using lldb expressions, while working on UI changes, can result in many benefits for the app, like shorter feedback loop, which increases the possibilities for a better product and user experience as it is easier for the developer to experiment with different variation of the UI.&lt;/p&gt;
+
+&lt;p&gt;Furthermore, it can result in higher efficiency for the developer because the builds will be less frequent and thus less idle time will be spent waiting to build the project.&lt;/p&gt;
+
+&lt;p&gt;Closing, and as it is my first actual post, I choose the following quote. See you soon!!&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Do the difficult things while they are easy and do the great things while they are small. A journey of a thousand miles must begin with a single step. &lt;br /&gt;
+— Lao Tzu&lt;/p&gt;
+&lt;/blockquote&gt;</content><author><name>Ioannis Diamantidis</name><email>diamantidis@outlook.com</email></author><category term="iOS" /><category term="Xcode" /><category term="LLDB" /><summary type="html">Have you ever been in a situation where you have to experiment with UI and change colors frequent? Does the designer or PM asks for changes in font sizes and you don’t want to stuck in the loop of while(!designer.isSatisfied) { doChanges() build() run() demo() } Imagine that you have something like the inspect element tools of a browser for iOS and an alternative to javascript to change the UI elements of the screen on the fly without having to rebuild the project.</summary></entry><entry><title type="html">Why I start a blog</title><link href="https://diamantidis.github.io/2018/09/23/why-i-start-a-blog" rel="alternate" type="text/html" title="Why I start a blog" /><published>2018-09-23T08:15:00+00:00</published><updated>2018-09-23T08:15:00+00:00</updated><id>https://diamantidis.github.io/2018/09/23/why-i-start-a-blog</id><content type="html" xml:base="https://diamantidis.github.io/2018/09/23/why-i-start-a-blog">&lt;h2 id=&quot;hello-world-this-is-my-first-blog-post-rocket&quot;&gt;Hello world, this is my first blog post!! :rocket:&lt;/h2&gt;
+&lt;p&gt;My name is Ioannis Diamantidis, I am a software developer and a few months ago I decided to start my own blog. Reading other developer’s blogposts every day, I decided that it is worth trying to start writing too, about my ideas and topics that I am interested in. The content of the blog will be related to software development(or at least I will try to). My intent is not to focus on one specific area, like iOS, but rather be more diverse.&lt;/p&gt;
+
+&lt;h2 id=&quot;why&quot;&gt;Why?&lt;/h2&gt;
+
+&lt;p&gt;There are many reasons that lead me to the decision of starting my own blog.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Improve my writing skills&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;I am of the opinion that practice makes perfection. So, by writing more often, I will eventually improve my ability to express and describe my ideas and thoughts better.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Improve my overall skills&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;I believe that writing about or trying to teach a topic is a great way for someone to really learn more about it. Writing or teaching requires some deeper understanding of the topic in order to be able to describe it or answer questions.
+Furthermore, publicly expressing ideas and opinions is a great way to receive some valuable feedback from the readers.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Give back to the community&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Throughout my career so far, I have learned a lot from the community and I consider this blog as a way to give back to the community and help other people get better through my blog posts. Writing about problems that I faced, technologies that I used - and I feel is worth writing(for me) and worth reading and learning(for the reader) - and practices that I follow and help me develop through my career, I hope that will be beneficial for some of the readers.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Explore some new technologies/tools&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;I have a long list of technologies that I want to experiment with but I couldn’t find any opportunity to try them. Writing a blog post or a tutorial maybe it’s a good way to remove some of them from my todo list.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Reference for the future&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;When I am exploring a new technology or doing something I wasn’t aware before, I have the tendency to keep a “How to” record as a reference for the future. So, instead of keeping files for these records(and struggle to find them when I need them), I will have this blog and use some of the blogposts as a reference for the future me(and others of course).&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Explore Jekyll&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Last but not least, it is a great opportunity to explore and built something with Jekyll and remove it once and for all from my todo list(You guess right, a blog post of my thoughts on Jekyll maybe is on the way). :smile:&lt;/p&gt;
+
+&lt;h2 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+&lt;p&gt;This is it for my first blog post. I am really excited to start this endeavour and I hope that this blog will justify the reasons for starting it and I will eventually reach my goals. Writing a blog and keeping it updated requires some commitment, so I will try to publish a new blogpost initially at least once every two weeks and as I am getting more familiar and better at writing I will try to do it more often.
+Lastly, I will try to close the blog posts with a quote that I think that match the content. This time is the &lt;code class=&quot;highlighter-rouge&quot;&gt;boy scout rule&lt;/code&gt; and it’s application in many aspect of our lives.&lt;/p&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;Always leave the campground (or code, world, everything) a little better than you found it.&lt;/p&gt;
+&lt;/blockquote&gt;</content><author><name>Ioannis Diamantidis</name><email>diamantidis@outlook.com</email></author><category term="personal" /><category term="blog" /><summary type="html">Hello world, this is my first blog post!! :rocket: My name is Ioannis Diamantidis, I am a software developer and a few months ago I decided to start my own blog. Reading other developer’s blogposts every day, I decided that it is worth trying to start writing too, about my ideas and topics that I am interested in. The content of the blog will be related to software development(or at least I will try to). My intent is not to focus on one specific area, like iOS, but rather be more diverse.</summary></entry></feed>
